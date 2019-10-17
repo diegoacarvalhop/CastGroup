@@ -1,5 +1,6 @@
 package br.com.castgroup.resources;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -80,49 +81,73 @@ public class LeftRightResources {
 	 */
 	@GetMapping("/diff")
 	public ResponseEntity<Map<String, String>> getDiff() {
+
 		Map<String, String> res = new HashMap<>();
-		List<Left> leftBase64 = leftRepository.findAll();
-		List<Right> rightBase64 = rightRepository.findAll();
-		if (!(leftBase64.size() > 1 && rightBase64.size() > 1)) {
-			String base64Left = new String(Base64.getDecoder().decode(leftBase64.get(0).getBase64()));
-			String base64Right = new String(Base64.getDecoder().decode(rightBase64.get(0).getBase64()));
-			if (base64Left.length() != base64Right.length()) {
-				res.put("Error", "Documentos <" + leftBase64.get(0).getId_request() + "> e <"
-						+ rightBase64.get(0).getId_request() + "> com tamanhos diferentes");
+
+		List<Left> leftBase = leftRepository.findAll();
+		List<Right> rightBase = rightRepository.findAll();
+
+		if (!leftBase.isEmpty() && !rightBase.isEmpty()) {
+
+			String stringBase64Left = new String(Base64.getDecoder().decode(leftBase.get(0).getBase64()));
+			String stringBase64Right = new String(Base64.getDecoder().decode(rightBase.get(0).getBase64()));
+
+			if (stringBase64Left.length() != stringBase64Right.length()) {
+
+				res.put("Error", "Documentos" + leftBase.get(0).getId_request() + " e "
+						+ rightBase.get(0).getId_request() + "com tamanhos diferentes");
+
 			} else {
-				String[] stringUm = base64Left.split(" ");
-				String[] stringDois = base64Right.split(" ");
+
+				char[] stringUm = stringBase64Left.toCharArray();
+				char[] stringDois = stringBase64Right.toCharArray();
+
+				List<Integer> listDiff = new ArrayList<Integer>();
+
 				for (int xL = 0; xL < stringUm.length; xL++) {
+
 					for (int xR = xL; xR < stringDois.length; xR++) {
-						if (stringUm[xL].equals(stringDois[xR])) {
+
+						if (stringUm[xL] == (stringDois[xR])) {
+
 							xR = stringDois.length;
+
 						} else {
-							stringDois[xR] = "'" + stringDois[xR] + "'";
+
+							listDiff.add(xR + 1);
 							xR = stringDois.length;
+
 						}
 					}
 				}
-				StringBuilder left = new StringBuilder();
-				StringBuilder right = new StringBuilder();
-				for (String item : stringUm) {
-					left.append(item);
-					left.append(" ");
-				}
-				left.replace(left.length() - 1, left.length(), "");
-				for (String item : stringDois) {
-					right.append(item);
-					right.append(" ");
-				}
-				right.replace(right.length() - 1, right.length(), "");
-				if (left.toString().equals(right.toString())) {
-					res.put("Success", "Documentos <" + leftBase64.get(0).getId_request() + "> e <"
-							+ rightBase64.get(0).getId_request() + "> idênticos");
+				if (listDiff.isEmpty()) {
+
+					res.put("Success", "Documentos " + leftBase.get(0).getId_request() + " e "
+							+ rightBase.get(0).getId_request() + " idênticos");
+
 				} else {
-					res.put("" + leftBase64.get(0).getId_request() + "", left.toString());
-					res.put("" + rightBase64.get(0).getId_request() + "", right.toString());
+
+					res.put("Diff",
+							"Documento ID(Left) " + leftBase.get(0).getId_request()
+									+ " diferente do Documento ID(Right) " + leftBase.get(0).getId_request()
+									+ " na(s) posição(es) " + listDiff.toString());
+
 				}
 			}
+		} else if (!leftBase.isEmpty() && rightBase.isEmpty()) {
+
+			res.put("Error", "Nenhum documento right encontrado");
+
+		} else if (leftBase.isEmpty() && !rightBase.isEmpty()) {
+
+			res.put("Error", "Nenhum documento left encontrado");
+
+		} else if (leftBase.isEmpty() && rightBase.isEmpty()) {
+
+			res.put("Error", "Nenhum documento left e right encontrado");
+
 		}
+
 		return new ResponseEntity<Map<String, String>>(res, HttpStatus.OK);
 	}
 
