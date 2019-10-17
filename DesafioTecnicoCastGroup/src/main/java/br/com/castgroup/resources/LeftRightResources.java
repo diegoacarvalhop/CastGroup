@@ -118,8 +118,8 @@ public class LeftRightResources {
 					res.put("Success", "Documentos <" + leftBase64.get(0).getId_request() + "> e <"
 							+ rightBase64.get(0).getId_request() + "> idênticos");
 				} else {
-					res.put("" + leftBase64.get(0).getId() + "", left.toString());
-					res.put("" + rightBase64.get(0).getId() + "", right.toString());
+					res.put("" + leftBase64.get(0).getId_request() + "", left.toString());
+					res.put("" + rightBase64.get(0).getId_request() + "", right.toString());
 				}
 			}
 		}
