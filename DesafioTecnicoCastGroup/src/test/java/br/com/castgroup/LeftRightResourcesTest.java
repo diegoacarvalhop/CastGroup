@@ -6,7 +6,6 @@ import static org.hamcrest.CoreMatchers.containsString;
 import org.apache.http.HttpStatus;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -16,9 +15,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import br.com.castgroup.controllers.LeftRightController;
 import br.com.castgroup.models.Left;
 import br.com.castgroup.models.Right;
-import br.com.castgroup.resources.LeftRightResources;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 
@@ -28,7 +27,7 @@ import io.restassured.http.ContentType;
 public class LeftRightResourcesTest {
 
 	@Mock
-	protected LeftRightResources leftRightResources;
+	protected LeftRightController leftRightController;
 
 	@Value("${local.server.port}")
 	protected int port;
@@ -38,56 +37,58 @@ public class LeftRightResourcesTest {
 		RestAssured.port = port;
 	}
 
-	@Ignore
 	@Test
 	public void a() {
-		Left left = new Left();
-		left.setBase64("RGllZ28gQWFzaXMgQ2FydmFsaG8gcGVyZWlyYQ==");
-		given().contentType(ContentType.JSON).pathParam("id", 12345L).body(left).post("/v1/diff/{id}/left").then()
-				.statusCode(HttpStatus.SC_OK);
+		given().get("/v1/diff/").then().statusCode(HttpStatus.SC_OK).body("Error",
+				containsString("Nenhum documento left e right encontrado"));
 	}
 
-	@Ignore
 	@Test
 	public void b() {
 		Right right = new Right();
 		right.setBase64("RGllZ28gQWFzaXMgQ2FydmFsaG8gcGVyZWlyYQ==");
-		given().contentType(ContentType.JSON).pathParam("id", 12345L).body(right).post("/v1/diff/{id}/right").then()
+		given().contentType(ContentType.JSON).pathParam("id", 12345).body(right).post("/v1/diff/{id}/right").then()
 				.statusCode(HttpStatus.SC_OK);
-	}
-
-	@Ignore
-	@Test
-	public void cSucess() {
-		given().get("/v1/diff/").then().statusCode(HttpStatus.SC_OK).body("Success",
-				containsString("Documentos 12345 e 12345 idênticos"));
-	}
-
-	@Ignore
-	@Test
-	public void cError() {
-		given().get("/v1/diff/").then().statusCode(HttpStatus.SC_OK).body("Error",
-				containsString("Documentos 12345 e 12345 com tamanhos diferentes"));
-	}
-
-	@Ignore
-	@Test
-	public void cErrorLeft() {
 		given().get("/v1/diff/").then().statusCode(HttpStatus.SC_OK).body("Error",
 				containsString("Nenhum documento left encontrado"));
 	}
 
-	@Ignore
 	@Test
-	public void dErrorRight() {
+	public void c() {
+		Left left = new Left();
+		left.setBase64("RGllZ28gQWFzaXMgQ2FydmFsaG8gcGVyZWlyYQ==");
+		given().contentType(ContentType.JSON).pathParam("id", 12345).body(left).post("/v1/diff/{id}/left").then()
+				.statusCode(HttpStatus.SC_OK);
 		given().get("/v1/diff/").then().statusCode(HttpStatus.SC_OK).body("Error",
 				containsString("Nenhum documento right encontrado"));
 	}
 
-	@Ignore
 	@Test
-	public void cErrorLeftRight() {
+	public void d() {
+		Left left = new Left();
+		left.setBase64("RGllZ28gQXNzaXMgQ2FydmFsaG8gUGVyZWlyYQ==");
+		given().contentType(ContentType.JSON).pathParam("id", 12345).body(left).post("/v1/diff/{id}/left").then()
+				.statusCode(HttpStatus.SC_OK);
+		Right right = new Right();
+		right.setBase64("RGllZ28gQXNzaXMgQ2FydmFsaG8gUGVyZWly");
+		given().contentType(ContentType.JSON).pathParam("id", 12345).body(right).post("/v1/diff/{id}/right").then()
+				.statusCode(HttpStatus.SC_OK);
 		given().get("/v1/diff/").then().statusCode(HttpStatus.SC_OK).body("Error",
-				containsString("Nenhum documento left e right encontrado"));
+				containsString("Documentos 12345 e 12345 com tamanhos diferentes"));
 	}
+
+	@Test
+	public void e() {
+		Left left = new Left();
+		left.setBase64("RGllZ28gQXNzaXMgQ2FydmFsaG8gUGVyZWlyYQ==");
+		given().contentType(ContentType.JSON).pathParam("id", 12345).body(left).post("/v1/diff/{id}/left").then()
+				.statusCode(HttpStatus.SC_OK);
+		Right right = new Right();
+		right.setBase64("RGllZ28gQXNzaXMgQ2FydmFsaG8gUGVyZWlyYQ==");
+		given().contentType(ContentType.JSON).pathParam("id", 12345).body(right).post("/v1/diff/{id}/right").then()
+				.statusCode(HttpStatus.SC_OK);
+		given().get("/v1/diff/").then().statusCode(HttpStatus.SC_OK).body("Success",
+				containsString("Documentos 12345 e 12345 idênticos"));
+	}
+
 }
